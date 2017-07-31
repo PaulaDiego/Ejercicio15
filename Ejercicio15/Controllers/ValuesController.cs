@@ -7,7 +7,6 @@ using System.Web.Http;
 
 namespace Ejercicio15.Controllers
 {
-    [Authorize]
     public class ValuesController : ApiController
     {
         // GET api/values
@@ -35,6 +34,7 @@ namespace Ejercicio15.Controllers
         // DELETE api/values/5
         public void Delete(int id)
         {
+            
         }
     }
 }

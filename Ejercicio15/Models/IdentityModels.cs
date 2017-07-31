@@ -29,5 +29,9 @@ namespace Ejercicio15.Models
         {
             return new ApplicationDbContext();
         }
+
+        public System.Data.Entity.DbSet<Ejercicio15.Persona> Personas { get; set; }
+
+        public System.Data.Entity.DbSet<Ejercicio15.Entrada> Entradas { get; set; }
     }
 }
