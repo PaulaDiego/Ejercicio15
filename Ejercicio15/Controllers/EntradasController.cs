@@ -1,35 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
-using Ejercicio15;
-using Ejercicio15.Models;
-using Ejercicio15.Repository;
+
 using Ejercicio15.Services;
 
 namespace Ejercicio15.Controllers
 {
     public class EntradasController : ApiController
     {
-        private ApplicationDbContext db = new ApplicationDbContext();
+        
+        private IEntradasService EntradasService;
+        public EntradasController(IEntradasService _EntradasService)
+        {
+            this.EntradasService = _EntradasService;
+        }
 
         // GET: api/Entradas
         public IQueryable<Entrada> GetEntradas()
         {
-            return db.Entradas;
+            return EntradasService.ReadEntradas();
         }
 
         // GET: api/Entradas/5
         [ResponseType(typeof(Entrada))]
         public IHttpActionResult GetEntrada(long id)
         {
-            Entrada entrada = db.Entradas.Find(id);
+            Entrada entrada = this.EntradasService.GetEntrada(id);
             if (entrada == null)
             {
                 return NotFound();
@@ -52,22 +49,13 @@ namespace Ejercicio15.Controllers
                 return BadRequest();
             }
 
-            db.Entry(entrada).State = EntityState.Modified;
-
             try
             {
-                db.SaveChanges();
+                this.EntradasService.PutEntrada(entrada);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (NoEncontradoException)
             {
-                if (!EntradaExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                 return NotFound();
             }
 
             return StatusCode(HttpStatusCode.NoContent);
@@ -82,10 +70,7 @@ namespace Ejercicio15.Controllers
                 return BadRequest(ModelState);
             }
 
-            IEntradasRepository entradasRepository = new EntradasRepository();
-            IEntradasService entradasService = new EntradasService(entradasRepository);
-
-            entrada = entradasService.Create(entrada);
+            entrada = this.EntradasService.Create(entrada);
             return CreatedAtRoute("DefaultApi", new { id = entrada.Id }, entrada);
         }
 
@@ -93,14 +78,13 @@ namespace Ejercicio15.Controllers
         [ResponseType(typeof(Entrada))]
         public IHttpActionResult DeleteEntrada(long id)
         {
-            Entrada entrada = db.Entradas.Find(id);
+            Entrada entrada = this.EntradasService.GetEntrada(id);
             if (entrada == null)
             {
                 return NotFound();
             }
 
-            db.Entradas.Remove(entrada);
-            db.SaveChanges();
+            this.EntradasService.Delete(entrada);
 
             return Ok(entrada);
         }
@@ -109,14 +93,14 @@ namespace Ejercicio15.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                //db.Dispose();
             }
             base.Dispose(disposing);
         }
 
         private bool EntradaExists(long id)
         {
-            return db.Entradas.Count(e => e.Id == id) > 0;
+            return this.EntradasService.ReadEntradas().Count(e => e.Id == id) > 0;
         }
     }
 }

@@ -8,6 +8,10 @@ namespace Ejercicio15.Services
 {
     public interface IEntradasService
     {
-         Entrada Create(Entrada entrada);
+        Entrada Create(Entrada entrada);
+        IQueryable<Entrada> ReadEntradas();
+        Entrada GetEntrada(long id);
+        void PutEntrada(Entrada entrada);
+        Entrada Delete(Entrada entrada);
     }
 }
